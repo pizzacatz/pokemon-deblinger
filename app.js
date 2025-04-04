@@ -223,26 +223,102 @@ function convertDecklist(decklist) {
     const lines = decklist.split('\n');
     const convertedLines = [];
     
+    // Map to store card groups for consolidation by section
+    const pokemonGroups = new Map();
+    const trainerGroups = new Map();
+    const energyGroups = new Map();
+    
     // Context object to track the current section
     const context = { currentSection: 'pokemon' };
 
+    // First pass: Convert all cards to their regular versions and group by section
     for (const line of lines) {
         const parsed = parseDecklistLine(line, context);
         
         if (!parsed.isCard) {
-            convertedLines.push(line);
             continue;
         }
 
         try {
             const regularVersion = findRegularVersion(parsed.name, parsed.set, parsed.number, parsed.cardType);
-            const convertedLine = `${parsed.quantity} ${parsed.name} ${regularVersion.set} ${regularVersion.number}`;
-            convertedLines.push(convertedLine);
+            
+            // Create a unique key for the card based on name and card type
+            // Extract card type from name (ex, V, etc.)
+            const cardTypeMatch = parsed.name.match(/\s(ex|V|VMAX|VSTAR|V-UNION|Prime|LEGEND|LV\.X|GX|BREAK|Prism Star|Radiant|ex)$/i);
+            const cardType = cardTypeMatch ? cardTypeMatch[1].toLowerCase() : 'regular';
+            const cardKey = `${parsed.name} ${cardType}`;
+            
+            // Select the appropriate group map based on section
+            let groupMap;
+            switch (context.currentSection) {
+                case 'pokemon':
+                    groupMap = pokemonGroups;
+                    break;
+                case 'trainer':
+                    groupMap = trainerGroups;
+                    break;
+                case 'energy':
+                    groupMap = energyGroups;
+                    break;
+                default:
+                    groupMap = pokemonGroups; // Default to pokemon if section is unknown
+            }
+            
+            // Add to card groups for consolidation
+            if (!groupMap.has(cardKey)) {
+                groupMap.set(cardKey, {
+                    name: parsed.name,
+                    set: regularVersion.set,
+                    number: regularVersion.number,
+                    quantity: 0
+                });
+            }
+            
+            // Add quantity to the group
+            groupMap.get(cardKey).quantity += parseInt(parsed.quantity);
+            
         } catch (error) {
             console.error(`Error converting card: ${parsed.name} ${parsed.set} ${parsed.number}`, error);
             // If there's an error, keep the original line
             convertedLines.push(parsed.originalLine);
         }
+    }
+
+    // Second pass: Output consolidated cards by section
+    // Clear the convertedLines array to remove duplicates
+    convertedLines.length = 0;
+    
+    // Add Pokemon section
+    convertedLines.push('Pokémon: ' + Array.from(pokemonGroups.values()).reduce((sum, card) => sum + card.quantity, 0));
+    convertedLines.push(''); // Empty line after header
+    
+    // Add Pokemon cards
+    for (const [cardKey, cardInfo] of pokemonGroups) {
+        convertedLines.push(`${cardInfo.quantity} ${cardInfo.name} ${cardInfo.set} ${cardInfo.number}`);
+    }
+    
+    // Add empty line between sections
+    convertedLines.push('');
+    
+    // Add Trainer section
+    convertedLines.push('Trainer: ' + Array.from(trainerGroups.values()).reduce((sum, card) => sum + card.quantity, 0));
+    convertedLines.push(''); // Empty line after header
+    
+    // Add Trainer cards
+    for (const [cardKey, cardInfo] of trainerGroups) {
+        convertedLines.push(`${cardInfo.quantity} ${cardInfo.name} ${cardInfo.set} ${cardInfo.number}`);
+    }
+    
+    // Add empty line between sections
+    convertedLines.push('');
+    
+    // Add Energy section
+    convertedLines.push('Energy: ' + Array.from(energyGroups.values()).reduce((sum, card) => sum + card.quantity, 0));
+    convertedLines.push(''); // Empty line after header
+    
+    // Add Energy cards
+    for (const [cardKey, cardInfo] of energyGroups) {
+        convertedLines.push(`${cardInfo.quantity} ${cardInfo.name} ${cardInfo.set} ${cardInfo.number}`);
     }
 
     return convertedLines.join('\n');
@@ -345,6 +421,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     copyBtn.addEventListener('click', () => copyToClipboard(outputTextarea.value));
     pasteBtn.addEventListener('click', pasteFromClipboard);
 
-    // Add example decklist
-    inputTextarea.value = `Paste your deck here`;
+    // Set placeholder text
+    inputTextarea.value = "Paste G-I blocks deck list here";
 }); 
