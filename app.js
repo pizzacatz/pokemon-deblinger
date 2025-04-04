@@ -346,39 +346,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     pasteBtn.addEventListener('click', pasteFromClipboard);
 
     // Add example decklist
-    inputTextarea.value = `Pokémon: 11
-2 Roaring Moon ex PRE 162
-1 Lumineon V BRS 156
-1 Radiant Greninja ASR 46
-1 Roaring Moon TEF 109
-1 Koraidon SSP 116
-1 Fezandipiti ex SFA 92
-1 Rotom V LOR 177
-1 Pecharunt ex PRE 163
-1 Latias ex SSP 239
-1 Squawkabilly ex PAL 264
-
-Trainer: 40
-4 Professor Sada's Vitality PAR 256
-3 Boss's Orders PAL 265
-1 Iono PAL 269
-1 Carmine TWM 217
-4 Earthen Vessel SFA 96
-4 Dark Patch LOR 216
-4 Nest Ball SUM 158
-4 Ultra Ball PLF 122
-2 Night Stretcher SSP 251
-1 Secret Box TWM 163
-1 Pal Pad FLF 92
-1 Hisuian Heavy Ball ASR 146
-2 Forest Seal Stone SIT 156
-2 Powerglass SFA 97
-1 Emergency Jelly SIT 155
-1 Bravery Charm SCR 175
-3 Town Store OBF 196
-1 PokéStop PGO 68
-
-Energy: 9
-6 Darkness Energy BUS 168
-3 Water Energy CIN 124`;
+    inputTextarea.value = `Paste your deck here`;
 }); 
